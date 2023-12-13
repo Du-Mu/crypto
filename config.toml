@@ -1,0 +1,5 @@
+[config]
+output_path = "./des"
+input_path = "./test.txt"
+key_path = "./key.txt"
+is_encrypt = true
