@@ -27,7 +27,7 @@ pub fn get_subkeys(key: u64) -> [u64; 16] {
     keys
 }
 
-/// Performs a left rotate on a 28 bit number
+///   Performs a left rotate on a 28 bit number
 fn rotate(mut val: u64, shift: u8) -> u64 {
     let top_bits = val >> (28 - shift);
     val <<= shift;
@@ -85,16 +85,9 @@ pub fn decrypt(mut data: u64, keys: [u64; 16]) -> u64 {
 #[cfg(test)]
 mod tests {
     use rand::Rng;
-    use super::s_boxes;
-    fn get_one_bit_num(num: u64) -> u8 {
-        let mut res = 0;
-        for i in 0..64 {
-            if (num >> i) & 0x01 == 1 {
-                res += 1;
-            }
-        }
-        res
-    }
+    use super::{encrypt, s_boxes};
+    use crate::utils::get_one_bit_num;
+
     #[test]
     fn test_nolinear() {
         let mut rng = rand::thread_rng();
@@ -232,5 +225,15 @@ mod tests {
             assert!((one_bit_num_with_zero  - (4*8*32-one_bit_num_with_zero)).abs() < 50);
 
         }
+    }
+    #[test]
+    fn test_gen_keys() {
+        let key = 0b00110001_00110010_00110011_00110100_00110101_00110110_00110111_00111000;
+        let keys = super::get_subkeys(key);
+        let data = 0b10001011_10110100_01111010_00001100_11110000_10101001_01100010_01101101;
+        let src_data = super::decrypt(data, keys);
+
+        assert_eq!(src_data,
+                   0b00110000_00110001_00110010_00110011_00110100_00110101_00110110_00110111);
     }
 }

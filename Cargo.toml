@@ -11,6 +11,11 @@ serde_derive = "1.0.136"
 rand = "0.8.5"
 ndarray = "0.15.6"
 linreg = "0.2.0"
+aes = "0.8.3"
+cipher = "0.4.4"
+generic-array = "0.14.7"
+criterion = "0.4.0"
+itertools = "0.10.5"
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }

@@ -1,11 +1,10 @@
-use std::fs;
-use criterion::{criterion_group, criterion_main, Criterion};
-use crypto::{config, libsm4};
+use std::{fs, vec};
+use crypto::config;
+use crypto::libaes;
 use crypto::utils::read_file_to_bytes;
 
-extern crate crypto;
 
-fn bench_sm4() {
+fn main() {
     let data = config::import_config("config.toml");
 
     let text = read_file_to_bytes(data.config.input_path.as_str());
@@ -22,7 +21,7 @@ fn bench_sm4() {
 
     let mut res = vec![0u8; block_num*16];
 
-    let sm4 = libsm4::SM4::new(key);
+    let aes = libaes::AES128::new(key);
 
     for i in 0..block_num {
 
@@ -33,9 +32,9 @@ fn bench_sm4() {
             block[0..16].copy_from_slice(&text[i*16..(i+1)*16]);
         };
         let block = if data.config.is_encrypt {
-            sm4.encrypt(&block)
+            aes.encrypt_block_AES128(&block)
         } else {
-            sm4.decrypt(&block)
+            aes.decrypt_block_AES128(&block)
         };
 
         res[16*i..16*i+16].copy_from_slice(&block);
@@ -45,11 +44,3 @@ fn bench_sm4() {
         .expect("Unable to write file");
 
 }
-
-
-fn sm4_benchmark(c: &mut Criterion) {
-    c.bench_function("aes: ", |b| b.iter(|| bench_sm4()));
-}
-
-criterion_group!(benches, sm4_benchmark);
-criterion_main!(benches);

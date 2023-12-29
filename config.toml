@@ -1,5 +1,5 @@
 [config]
-output_path = "./des"
+output_path = "./sm4"
 input_path = "./test.txt"
 key_path = "./key.txt"
 is_encrypt = true

@@ -1,11 +1,12 @@
 use std::fs;
 use criterion::{criterion_group, criterion_main, Criterion};
-use crypto::{config, libsm4};
+use crypto::{config, libaes};
+use crypto::libaes::AES128;
 use crypto::utils::read_file_to_bytes;
 
 extern crate crypto;
 
-fn bench_sm4() {
+fn bench_aes() {
     let data = config::import_config("config.toml");
 
     let text = read_file_to_bytes(data.config.input_path.as_str());
@@ -14,15 +15,15 @@ fn bench_sm4() {
 
     let key = key[0..16].try_into().unwrap();
 
-    let block_num = if text.len() % 16 == 0 {
-        text.len() / 16
+    let block_num = if text.len() % 8 == 0 {
+        text.len() / 8
     } else {
-        text.len() / 16 + 1
+        text.len() / 8 + 1
     };
 
-    let mut res = vec![0u8; block_num*16];
+    let mut res = vec![0u8; block_num*8];
 
-    let sm4 = libsm4::SM4::new(key);
+    let aes = libaes::AES128::new(key);
 
     for i in 0..block_num {
 
@@ -33,12 +34,12 @@ fn bench_sm4() {
             block[0..16].copy_from_slice(&text[i*16..(i+1)*16]);
         };
         let block = if data.config.is_encrypt {
-            sm4.encrypt(&block)
+            aes.encrypt_block_AES128(&block)
         } else {
-            sm4.decrypt(&block)
+            aes.decrypt_block_AES128(&block)
         };
 
-        res[16*i..16*i+16].copy_from_slice(&block);
+        res[8*i..8*i+8].copy_from_slice(&block);
     }
 
     fs::write(data.config.output_path, res)
@@ -47,9 +48,9 @@ fn bench_sm4() {
 }
 
 
-fn sm4_benchmark(c: &mut Criterion) {
-    c.bench_function("aes: ", |b| b.iter(|| bench_sm4()));
+fn aes_benchmark(c: &mut Criterion) {
+    c.bench_function("aes: ", |b| b.iter(|| bench_aes()));
 }
 
-criterion_group!(benches, sm4_benchmark);
+criterion_group!(benches, aes_benchmark);
 criterion_main!(benches);
